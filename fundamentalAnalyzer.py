@@ -80,21 +80,15 @@ for index, row in stock_data['ACSEL'].iterrows():
         date_value = pd.concat([row[1:]], axis=1).T
         row1 = pd.concat([title, date_value], axis=1)
         a = row1.drop('Bilanço', axis=1)
-        selected_row = a.iloc[0]
-        for i in range(1, len(selected_row)):
-            # if i < 3:
-            #     a.iloc[0, i-1] = selected_row.iloc[i-1] - selected_row.iloc[i]
-            # if i > 3:
-            #     for j in range(i, min(i + 3, len(selected_row))):
-            #         a.iloc[0, i-1] = selected_row.iloc[i-1] - selected_row.iloc[i]
-            for column in a.columns:
-                if column.split('/')[1] != 3:
-                    a.iloc[0, i-1] = selected_row.iloc[i-1] - selected_row.iloc[i]
 
-                elif column.split('/')[1] == 3:
-                    continue
+        for i in range(0, len(a.columns) -1):
+            current_col = a.columns[i]
+            prev_col = a.columns[i+1]
+
+            if not current_col.endswith('/3'):
+                a[current_col] = a[current_col] - a[prev_col]
 
         holder = holder._append(a)
 
-# print(holder)
-show(holder)
+print(holder)
+# show(holder)
