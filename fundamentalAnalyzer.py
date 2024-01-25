@@ -80,7 +80,7 @@ for index, row in stock_data['ACSEL'].iterrows():
         date_value = pd.concat([row[1:]], axis=1).T
         row1 = pd.concat([title, date_value], axis=1)
         a = row1.drop('Bilanço', axis=1)
-        selected_row = pd.DataFrame(a.iloc[0]).T
+        selected_row = a.iloc[0]
         for i in range(1, len(selected_row)):
             # if i < 3:
             #     a.iloc[0, i-1] = selected_row.iloc[i-1] - selected_row.iloc[i]
