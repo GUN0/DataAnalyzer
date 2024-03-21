@@ -4,6 +4,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+
 # from pandasgui import show
 
 url = "https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/default.aspx"
@@ -217,6 +218,9 @@ for i in sorted_directory:
         file["Bilanço"] == "Pazarlama, Satış ve Dağıtım Giderleri (-)"
     ]
     genel_yonetim = file[file["Bilanço"] == "Genel Yönetim Giderleri (-)"]
+    diger_faliyet_giderleri = file[file["Bilanço"] == "Diğer Faaliyet Giderleri (-)"]
+    diger_faliyet_gelirleri = file[file["Bilanço"] == "Diğer Faaliyet Gelirleri"]
+
     financials = pd.concat(
         [
             donen_varliklar,
@@ -234,6 +238,8 @@ for i in sorted_directory:
             arge,
             pazar_satis_dagitim,
             genel_yonetim,
+            diger_faliyet_giderleri,
+            diger_faliyet_gelirleri,
         ]
     )
     for numeric in financials.columns[1:]:
@@ -348,20 +354,20 @@ for key, df in stock_data.items():
             date_value4 = pd.concat([row[1:]], axis=1).T
             row4 = pd.concat([title4, date_value4], axis=1)
 
-            uzun_vadeli_borc = row4.drop("Bilanço", axis=1)
-            uzun_vadeli_borc.insert(0, "Değerler", "Uzun Vadeli Borçlar")
+            kisa_vadeli_borc = row4.drop("Bilanço", axis=1)
+            kisa_vadeli_borc.insert(0, "Değerler", "Kısa Vadeli Borçlar")
 
-            bilanco_adjusted = bilanco_adjusted._append(uzun_vadeli_borc)
+            bilanco_adjusted = bilanco_adjusted._append(kisa_vadeli_borc)
 
         elif index == 36:
             title5 = pd.concat([row[:1]], axis=1).T
             date_value5 = pd.concat([row[1:]], axis=1).T
             row5 = pd.concat([title5, date_value5], axis=1)
 
-            kisa_vadeli_borc = row5.drop("Bilanço", axis=1)
-            kisa_vadeli_borc.insert(0, "Değerler", "Kısa Vadeli Borçlar")
+            uzun_vadeli_borc = row5.drop("Bilanço", axis=1)
+            uzun_vadeli_borc.insert(0, "Değerler", "Uzun Vadeli Borçlar")
 
-            bilanco_adjusted = bilanco_adjusted._append(kisa_vadeli_borc)
+            bilanco_adjusted = bilanco_adjusted._append(uzun_vadeli_borc)
 
         elif index == 1:
             title6 = pd.concat([row[:1]], axis=1).T
@@ -525,6 +531,30 @@ for key, df in stock_data.items():
             genel_yonetim_giderleri.insert(0, "Değerler", "Genel Yönetim Giderleri (-)")
 
             bilanco_adjusted = bilanco_adjusted._append(genel_yonetim_giderleri)
+
+        elif index == 71:
+            title14 = pd.concat([row[:1]], axis=1).T
+            date_value14 = pd.concat([row[1:]], axis=1).T
+            row14 = pd.concat([title14, date_value14], axis=1)
+
+            diger_faliyet_giderleri_proper = row14.drop("Bilanço", axis=1)
+            diger_faliyet_giderleri_proper.insert(
+                0, "Değerler", "Diğer Faaliyet Giderleri (-)"
+            )
+
+            bilanco_adjusted = bilanco_adjusted._append(diger_faliyet_giderleri_proper)
+
+        elif index == 70:
+            title15 = pd.concat([row[:1]], axis=1).T
+            date_value15 = pd.concat([row[1:]], axis=1).T
+            row15 = pd.concat([title15, date_value15], axis=1)
+
+            diger_faliyet_gelirleri_proper = row15.drop("Bilanço", axis=1)
+            diger_faliyet_gelirleri_proper.insert(
+                0, "Değerler", "Diğer Faaliyet Gelirleri"
+            )
+
+            bilanco_adjusted = bilanco_adjusted._append(diger_faliyet_gelirleri_proper)
 
     bilanco_adjusted.to_excel(
         "/home/gun/Documents/ProperReports/{}.xlsx".format(key), index=False
