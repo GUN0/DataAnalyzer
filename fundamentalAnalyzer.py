@@ -253,6 +253,11 @@ for key, df in stock_data.items():
     brut_kar_yillik_df = pd.DataFrame()
     ozkaynak_ortalama_df = pd.DataFrame()
     ortalama_kaynaklar_df = pd.DataFrame()
+    ar_ge_yillik_df = pd.DataFrame()
+    pazar_satis_dagitim_yillik_df = pd.DataFrame()
+    genel_yonetim_giderleri_yillik_df = pd.DataFrame()
+    diger_faliyet_giderleri_yillik_df = pd.DataFrame()
+    diger_faliyet_gelirleri_yillik_df = pd.DataFrame()
 
     for index, row in stock_data[key].iterrows():
         if index == 0:
@@ -505,56 +510,248 @@ for key, df in stock_data.items():
             date_value11 = pd.concat([row[1:]], axis=1).T
             row11 = pd.concat([title11, date_value11], axis=1)
 
-            ar_ge = row11.drop("Bilanço", axis=1)
-            ar_ge.insert(0, "Değerler", "Araştırma ve Geliştirme Giderleri (-)")
+            ar_ge_ceyrek = row11.drop("Bilanço", axis=1)
+            ar_ge_ceyrek.insert(
+                0, "Değerler", "Araştırma ve Geliştirme Giderleri Çeyreklik"
+            )
 
-            bilanco_adjusted = bilanco_adjusted._append(ar_ge)
+            for i in range(1, len(ar_ge_ceyrek.columns) - 1):
+                current_col = ar_ge_ceyrek.columns[i]
+                prev_col = ar_ge_ceyrek.columns[i + 1]
+
+                if not current_col.endswith("/3"):
+                    ar_ge_ceyrek[current_col] = (
+                        ar_ge_ceyrek[current_col] - ar_ge_ceyrek[prev_col]
+                    )
+
+            ar_ge_yillik = ar_ge_ceyrek.drop("Değerler", axis=1)
+            ar_ge_yillik.insert(
+                0, "Değerler", "Araştırma ve Geliştirme Giderleri Yıllık"
+            )
+
+            for i in range(1, len(ar_ge_yillik.columns) - 3):
+                col1 = ar_ge_yillik.columns[i + 1]
+                col2 = ar_ge_yillik.columns[i + 2]
+                col3 = ar_ge_yillik.columns[i + 3]
+                current_col = ar_ge_yillik.columns[i]
+
+                ar_ge_yillik[current_col] = (
+                    ar_ge_yillik[current_col]
+                    + ar_ge_yillik[col1]
+                    + ar_ge_yillik[col2]
+                    + ar_ge_yillik[col3]
+                )
+            ar_ge_yillik.iloc[0, -3:] = 0
+
+            ar_ge_yillik_df = ar_ge_yillik_df._append(ar_ge_yillik)
+            ar_ge_yillik_df.set_index(pd.Index([699]), inplace=True)
+
+            bilanco_adjusted = bilanco_adjusted._append([ar_ge_ceyrek, ar_ge_yillik_df])
 
         elif index == 67:
             title12 = pd.concat([row[:1]], axis=1).T
             date_value12 = pd.concat([row[1:]], axis=1).T
             row12 = pd.concat([title12, date_value12], axis=1)
 
-            pazar_satis_dagitim_proper = row12.drop("Bilanço", axis=1)
-            pazar_satis_dagitim_proper.insert(
-                0, "Değerler", "Pazarlama, Satış ve Dağıtım Giderleri (-)"
+            pazar_satis_dagitim_ceyrek = row12.drop("Bilanço", axis=1)
+            pazar_satis_dagitim_ceyrek.insert(
+                0, "Değerler", "Pazarlama, Satış ve Dağıtım Giderleri Çeyreklik"
+            )
+            for i in range(1, len(pazar_satis_dagitim_ceyrek.columns) - 1):
+                current_col = pazar_satis_dagitim_ceyrek.columns[i]
+                prev_col = pazar_satis_dagitim_ceyrek.columns[i + 1]
+
+                if not current_col.endswith("/3"):
+                    pazar_satis_dagitim_ceyrek[current_col] = (
+                        pazar_satis_dagitim_ceyrek[current_col]
+                        - pazar_satis_dagitim_ceyrek[prev_col]
+                    )
+
+            pazar_satis_dagitim_yillik = pazar_satis_dagitim_ceyrek.drop(
+                "Değerler", axis=1
+            )
+            pazar_satis_dagitim_yillik.insert(
+                0, "Değerler", "Pazarlama, Satış ve Dağıtım Giderleri Yıllık"
             )
 
-            bilanco_adjusted = bilanco_adjusted._append(pazar_satis_dagitim_proper)
+            for i in range(1, len(pazar_satis_dagitim_yillik.columns) - 3):
+                col1 = pazar_satis_dagitim_yillik.columns[i + 1]
+                col2 = pazar_satis_dagitim_yillik.columns[i + 2]
+                col3 = pazar_satis_dagitim_yillik.columns[i + 3]
+                current_col = pazar_satis_dagitim_yillik.columns[i]
+
+                pazar_satis_dagitim_yillik[current_col] = (
+                    pazar_satis_dagitim_yillik[current_col]
+                    + pazar_satis_dagitim_yillik[col1]
+                    + pazar_satis_dagitim_yillik[col2]
+                    + pazar_satis_dagitim_yillik[col3]
+                )
+            pazar_satis_dagitim_yillik.iloc[0, -3:] = 0
+
+            pazar_satis_dagitim_yillik_df = pazar_satis_dagitim_yillik_df._append(
+                pazar_satis_dagitim_yillik
+            )
+            pazar_satis_dagitim_yillik_df.set_index(pd.Index([677]), inplace=True)
+
+            bilanco_adjusted = bilanco_adjusted._append(
+                [pazar_satis_dagitim_ceyrek, pazar_satis_dagitim_yillik_df]
+            )
 
         elif index == 68:
             title13 = pd.concat([row[:1]], axis=1).T
             date_value13 = pd.concat([row[1:]], axis=1).T
             row13 = pd.concat([title13, date_value13], axis=1)
 
-            genel_yonetim_giderleri = row13.drop("Bilanço", axis=1)
-            genel_yonetim_giderleri.insert(0, "Değerler", "Genel Yönetim Giderleri (-)")
+            genel_yonetim_giderleri_ceyrek = row13.drop("Bilanço", axis=1)
+            genel_yonetim_giderleri_ceyrek.insert(
+                0, "Değerler", "Genel Yönetim Giderleri Çeyreklik"
+            )
 
-            bilanco_adjusted = bilanco_adjusted._append(genel_yonetim_giderleri)
+            for i in range(1, len(genel_yonetim_giderleri_ceyrek.columns) - 1):
+                current_col = genel_yonetim_giderleri_ceyrek.columns[i]
+                prev_col = genel_yonetim_giderleri_ceyrek.columns[i + 1]
+
+                if not current_col.endswith("/3"):
+                    genel_yonetim_giderleri_ceyrek[current_col] = (
+                        genel_yonetim_giderleri_ceyrek[current_col]
+                        - genel_yonetim_giderleri_ceyrek[prev_col]
+                    )
+
+            genel_yonetim_giderleri_yillik = genel_yonetim_giderleri_ceyrek.drop(
+                "Değerler", axis=1
+            )
+            genel_yonetim_giderleri_yillik.insert(
+                0, "Değerler", "Genel Yönetim Giderleri Yıllık"
+            )
+
+            for i in range(1, len(genel_yonetim_giderleri_yillik.columns) - 3):
+                col1 = genel_yonetim_giderleri_yillik.columns[i + 1]
+                col2 = genel_yonetim_giderleri_yillik.columns[i + 2]
+                col3 = genel_yonetim_giderleri_yillik.columns[i + 3]
+                current_col = genel_yonetim_giderleri_yillik.columns[i]
+
+                genel_yonetim_giderleri_yillik[current_col] = (
+                    genel_yonetim_giderleri_yillik[current_col]
+                    + genel_yonetim_giderleri_yillik[col1]
+                    + genel_yonetim_giderleri_yillik[col2]
+                    + genel_yonetim_giderleri_yillik[col3]
+                )
+            genel_yonetim_giderleri_yillik.iloc[0, -3:] = 0
+
+            genel_yonetim_giderleri_yillik_df = (
+                genel_yonetim_giderleri_yillik_df._append(
+                    genel_yonetim_giderleri_yillik
+                )
+            )
+            genel_yonetim_giderleri_yillik_df.set_index(pd.Index([688]), inplace=True)
+
+            bilanco_adjusted = bilanco_adjusted._append(
+                [genel_yonetim_giderleri_ceyrek, genel_yonetim_giderleri_yillik_df]
+            )
 
         elif index == 71:
             title14 = pd.concat([row[:1]], axis=1).T
             date_value14 = pd.concat([row[1:]], axis=1).T
             row14 = pd.concat([title14, date_value14], axis=1)
 
-            diger_faliyet_giderleri_proper = row14.drop("Bilanço", axis=1)
-            diger_faliyet_giderleri_proper.insert(
-                0, "Değerler", "Diğer Faaliyet Giderleri (-)"
+            diger_faliyet_giderleri_ceyrek = row14.drop("Bilanço", axis=1)
+            diger_faliyet_giderleri_ceyrek.insert(
+                0, "Değerler", "Diğer Faaliyet Giderleri Çeyreklik"
             )
 
-            bilanco_adjusted = bilanco_adjusted._append(diger_faliyet_giderleri_proper)
+            for i in range(1, len(diger_faliyet_giderleri_ceyrek.columns) - 1):
+                current_col = diger_faliyet_giderleri_ceyrek.columns[i]
+                prev_col = diger_faliyet_giderleri_ceyrek.columns[i + 1]
+
+                if not current_col.endswith("/3"):
+                    diger_faliyet_giderleri_ceyrek[current_col] = (
+                        diger_faliyet_giderleri_ceyrek[current_col]
+                        - diger_faliyet_giderleri_ceyrek[prev_col]
+                    )
+
+            diger_faliyet_giderleri_yillik = diger_faliyet_giderleri_ceyrek.drop(
+                "Değerler", axis=1
+            )
+            diger_faliyet_giderleri_yillik.insert(
+                0, "Değerler", "Diğer Faaliyet Giderleri Yıllık"
+            )
+
+            for i in range(1, len(diger_faliyet_giderleri_yillik.columns) - 3):
+                col1 = diger_faliyet_giderleri_yillik.columns[i + 1]
+                col2 = diger_faliyet_giderleri_yillik.columns[i + 2]
+                col3 = diger_faliyet_giderleri_yillik.columns[i + 3]
+                current_col = diger_faliyet_giderleri_yillik.columns[i]
+
+                diger_faliyet_giderleri_yillik[current_col] = (
+                    diger_faliyet_giderleri_yillik[current_col]
+                    + diger_faliyet_giderleri_yillik[col1]
+                    + diger_faliyet_giderleri_yillik[col2]
+                    + diger_faliyet_giderleri_yillik[col3]
+                )
+            diger_faliyet_giderleri_yillik.iloc[0, -3:] = 0
+
+            diger_faliyet_giderleri_yillik_df = (
+                diger_faliyet_giderleri_yillik_df._append(
+                    diger_faliyet_giderleri_yillik
+                )
+            )
+            diger_faliyet_giderleri_yillik_df.set_index(pd.Index([710]), inplace=True)
+
+            bilanco_adjusted = bilanco_adjusted._append(
+                [diger_faliyet_giderleri_ceyrek, diger_faliyet_giderleri_yillik_df]
+            )
 
         elif index == 70:
             title15 = pd.concat([row[:1]], axis=1).T
             date_value15 = pd.concat([row[1:]], axis=1).T
             row15 = pd.concat([title15, date_value15], axis=1)
 
-            diger_faliyet_gelirleri_proper = row15.drop("Bilanço", axis=1)
-            diger_faliyet_gelirleri_proper.insert(
-                0, "Değerler", "Diğer Faaliyet Gelirleri"
+            diger_faliyet_gelirleri_ceyrek = row15.drop("Bilanço", axis=1)
+            diger_faliyet_gelirleri_ceyrek.insert(
+                0, "Değerler", "Diğer Faaliyet Gelirleri Çeyreklik"
             )
 
-            bilanco_adjusted = bilanco_adjusted._append(diger_faliyet_gelirleri_proper)
+            for i in range(1, len(diger_faliyet_gelirleri_ceyrek.columns) - 1):
+                current_col = diger_faliyet_gelirleri_ceyrek.columns[i]
+                prev_col = diger_faliyet_gelirleri_ceyrek.columns[i + 1]
+
+                if not current_col.endswith("/3"):
+                    diger_faliyet_gelirleri_ceyrek[current_col] = (
+                        diger_faliyet_gelirleri_ceyrek[current_col]
+                        - diger_faliyet_gelirleri_ceyrek[prev_col]
+                    )
+
+            diger_faliyet_gelirleri_yillik = diger_faliyet_gelirleri_ceyrek.drop(
+                "Değerler", axis=1
+            )
+            diger_faliyet_gelirleri_yillik.insert(
+                0, "Değerler", "Diğer Faaliyet Gelirleri Yıllık"
+            )
+
+            for i in range(1, len(diger_faliyet_gelirleri_yillik.columns) - 3):
+                col1 = diger_faliyet_gelirleri_yillik.columns[i + 1]
+                col2 = diger_faliyet_gelirleri_yillik.columns[i + 2]
+                col3 = diger_faliyet_gelirleri_yillik.columns[i + 3]
+                current_col = diger_faliyet_gelirleri_yillik.columns[i]
+
+                diger_faliyet_gelirleri_yillik[current_col] = (
+                    diger_faliyet_gelirleri_yillik[current_col]
+                    + diger_faliyet_gelirleri_yillik[col1]
+                    + diger_faliyet_gelirleri_yillik[col2]
+                    + diger_faliyet_gelirleri_yillik[col3]
+                )
+            diger_faliyet_gelirleri_yillik.iloc[0, -3:] = 0
+
+            diger_faliyet_gelirleri_yillik_df = (
+                diger_faliyet_gelirleri_yillik_df._append(
+                    diger_faliyet_gelirleri_yillik
+                )
+            )
+            diger_faliyet_gelirleri_yillik_df.set_index(pd.Index([700]), inplace=True)
+
+            bilanco_adjusted = bilanco_adjusted._append(
+                [diger_faliyet_gelirleri_ceyrek, diger_faliyet_gelirleri_yillik_df]
+            )
 
     bilanco_adjusted.to_excel(
         "/home/gun/Documents/ProperReports/{}.xlsx".format(key), index=False
